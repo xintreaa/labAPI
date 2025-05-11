@@ -1,11 +1,10 @@
 # app/models/categories.py
-from typing import TYPE_CHECKING, List, Optional
-from sqlmodel import Field, SQLModel, Relationship
+from typing import List, Optional
+from sqlmodel import SQLModel, Field, Relationship
 from datetime import datetime, timezone
-from app.models.links import BookCategoryLink  # Імпортуємо з links.py
 
-if TYPE_CHECKING:
-    from app.models.books import Book
+from app.models import BookCategoryLink
+
 
 class CategoryBase(SQLModel):
     name: str
@@ -24,7 +23,7 @@ class Category(CategoryBase, table=True):
 class CategoryCreate(CategoryBase):
     pass
 
-class CategoryUpdate(SQLModel):
+class CategoryUpdate(CategoryBase):
     name: Optional[str] = None
     description: Optional[str] = None
 

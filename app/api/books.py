@@ -6,16 +6,14 @@ from sqlmodel import Session
 from app.db.database import get_session
 from app.models.books import BookCreate, BookRead, BookUpdate
 from app.crud.books import crud_books
-# from app.services.book_service import BookService
+from app.services import book_service
 
 router = APIRouter()
-# book_service = BookService()
-
 
 @router.post("/", response_model=BookRead, status_code=status.HTTP_201_CREATED)
 def create_book(
-        book: BookCreate,
-        db: Session = Depends(get_session)
+    book: BookCreate,
+    db: Session = Depends(get_session)
 ):
     # Check if a book with the same ISBN already exists
     existing_books = crud_books.search_books(db, title=None, author_id=None)
@@ -26,20 +24,23 @@ def create_book(
                 detail=f"Book with ISBN {book.isbn} already exists"
             )
 
-    return crud_books.create_with_relations(db=db, obj_in=book)
-
+    created_book = crud_books.create_with_relations(db=db, obj_in=book)
+    # Явне завантаження зв’язків
+    created_book.authors  # Завантажуємо авторів
+    created_book.categories  # Завантажуємо категорії
+    return created_book
 
 @router.get("/", response_model=List[BookRead])
 def read_books(
-        *,
-        db: Session = Depends(get_session),
-        skip: int = 0,
-        limit: int = 100,
-        title: Optional[str] = None,
-        author_id: Optional[int] = None,
-        category_id: Optional[int] = None
+    *,
+    db: Session = Depends(get_session),
+    skip: int = 0,
+    limit: int = 100,
+    title: Optional[str] = None,
+    author_id: Optional[int] = None,
+    category_id: Optional[int] = None
 ):
-    return crud_books.search_books(
+    books = crud_books.search_books(
         db=db,
         title=title,
         author_id=author_id,
@@ -47,13 +48,17 @@ def read_books(
         skip=skip,
         limit=limit
     )
-
+    # Явне завантаження зв’язків для всіх книг
+    for book in books:
+        book.authors  # Завантажуємо авторів
+        book.categories  # Завантажуємо категорії
+    return books
 
 @router.get("/{book_id}", response_model=BookRead)
 def read_book(
-        *,
-        book_id: int,
-        db: Session = Depends(get_session)
+    *,
+    book_id: int,
+    db: Session = Depends(get_session)
 ):
     book = crud_books.get(db=db, id=book_id)
     if not book:
@@ -61,15 +66,17 @@ def read_book(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Book with ID {book_id} not found"
         )
+    # Явне завантаження зв’язків
+    book.authors  # Завантажуємо авторів
+    book.categories  # Завантажуємо категорії
     return book
-
 
 @router.put("/{book_id}", response_model=BookRead)
 def update_book(
-        *,
-        book_id: int,
-        book: BookUpdate,
-        db: Session = Depends(get_session)
+    *,
+    book_id: int,
+    book: BookUpdate,
+    db: Session = Depends(get_session)
 ):
     db_book = crud_books.get(db=db, id=book_id)
     if not db_book:
@@ -88,14 +95,17 @@ def update_book(
                     detail=f"Book with ISBN {book.isbn} already exists"
                 )
 
-    return crud_books.update_with_relations(db=db, db_obj=db_book, obj_in=book)
+    updated_book = crud_books.update_with_relations(db=db, db_obj=db_book, obj_in=book)
+    # Явне завантаження зв’язків
+    updated_book.authors  # Завантажуємо авторів
+    updated_book.categories  # Завантажуємо категорії
+    return updated_book
 
-
-@router.delete("/{book_id}", response_model=BookRead)
+@router.delete("/{book_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_book(
-        *,
-        book_id: int,
-        db: Session = Depends(get_session)
+    *,
+    book_id: int,
+    db: Session = Depends(get_session)
 ):
     book = crud_books.get(db=db, id=book_id)
     if not book:
@@ -112,14 +122,15 @@ def delete_book(
             detail=f"Cannot delete book with ID {book_id} because it has active borrows"
         )
     '''
-    return crud_books.remove(db=db, id=book_id)
+    crud_books.remove(db=db, id=book_id)
+    return {"message": "Book deleted successfully"}  # Повертаємо відповідь для відповідності status_code
 
-'''
+
 @router.get("/{book_id}/available", response_model=dict)
 def check_book_availability(
-        *,
-        book_id: int,
-        db: Session = Depends(get_session)
+    *,
+    book_id: int,
+    db: Session = Depends(get_session)
 ):
     book = crud_books.get(db=db, id=book_id)
     if not book:
@@ -136,4 +147,3 @@ def check_book_availability(
         "available_copies": available_copies,
         "is_available": available_copies > 0
     }
-'''

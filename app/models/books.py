@@ -1,12 +1,11 @@
 # app/models/books.py
-from typing import TYPE_CHECKING, List, Optional
+from typing import List, Optional
 from sqlmodel import Field, SQLModel, Relationship
 from datetime import datetime, timezone
-from app.models.links import BookAuthorLink, BookCategoryLink  # Імпортуємо з links.py
-
-if TYPE_CHECKING:
-    from app.models.authors import Author
-    from app.models.categories import Category
+from app.models.links import BookAuthorLink, BookCategoryLink
+# Явно імпортуємо AuthorRead і CategoryRead
+from app.models.authors import Author, AuthorRead
+from app.models.categories import Category, CategoryRead
 
 class BookBase(SQLModel):
     title: str = Field(index=True)
@@ -19,11 +18,11 @@ class Book(BookBase, table=True):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-    authors: List["Author"] = Relationship(
+    authors: List[Author] = Relationship(
         back_populates="books",
         link_model=BookAuthorLink
     )
-    categories: List["Category"] = Relationship(
+    categories: List[Category] = Relationship(
         back_populates="books",
         link_model=BookCategoryLink
     )
@@ -44,6 +43,8 @@ class BookRead(BookBase):
     id: int
     created_at: datetime
     updated_at: datetime
+    authors: List[AuthorRead] = []  # Використовуємо AuthorRead напряму
+    categories: List[CategoryRead] = []  # Використовуємо CategoryRead напряму
 
     class Config:
-        from_attributes = True  # Оновлено з orm_mode
+        from_attributes = True
