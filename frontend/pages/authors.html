@@ -1,0 +1,61 @@
+<!-- frontend/pages/authors.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library API - Authors</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="/pages/users.html">Users</a></li>
+            <li><a href="/pages/books.html">Books</a></li>
+            <li><a href="/pages/authors.html">Authors</a></li>
+            <li><a href="/pages/categories.html">Categories</a></li>
+            <li><a href="/pages/borrowed-books.html">Borrowed Books</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <h1>Library API - Manage Authors</h1>
+
+        <div class="form-container">
+            <h2 id="form-title">Create Author</h2>
+            <form id="author-form">
+                <input type="hidden" id="author-id">
+                <div class="form-group">
+                    <label for="first_name">First Name:</label>
+                    <input type="text" id="first_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="last_name">Last Name:</label>
+                    <input type="text" id="last_name" required>
+                </div>
+                <button type="submit">Save Author</button>
+                <button type="button" id="cancel-update" style="display: none;">Cancel</button>
+            </form>
+        </div>
+
+        <div class="table-container">
+            <h2>Authors List</h2>
+            <table id="authors-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Created At</th>
+                        <th>Updated At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="authors-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/scripts/authors.js"></script> <!-- Оновлено шлях -->
+</body>
+</html>
