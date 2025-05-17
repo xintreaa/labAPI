@@ -1,11 +1,9 @@
-# app/main.py
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import time
 
 from app.utils.logger import setup_logging
-from app.db import create_db_and_tables
 from app.api import books, authors, categories, borrowed_books
 from api.users import users
 logger = setup_logging()
@@ -14,7 +12,6 @@ logger = setup_logging()
 async def lifespan(app: FastAPI):
     start_time = time.time()
     logger.info("Starting application...")
-    create_db_and_tables()
     logger.info(f"Application started in {time.time() - start_time:.2f} seconds")
     yield
     logger.info("Shutting down application...")
@@ -34,7 +31,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Виправляємо виклики include_router
 app.include_router(books, prefix="/api/books", tags=["books"])
 app.include_router(authors, prefix="/api/authors", tags=["authors"])
 app.include_router(categories, prefix="/api/categories", tags=["categories"])

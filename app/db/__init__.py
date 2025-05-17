@@ -1,2 +1,5 @@
-# app/db/__init__.py
-from .database import create_db_and_tables, get_session, engine
+import os
+from sqlmodel import create_engine
+
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@db:5432/library_db")
+engine = create_engine(DATABASE_URL, echo=True)
